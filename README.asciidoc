@@ -1,0 +1,66 @@
+= Welcome to metalink
+
+Utility to generate XML with sha1 hashes of file chunks. These further can be used in Metalink descriptions .meta4 or .metalink.
+
+I see a problem in Metalink format that it includes both static information (size and checksums) and dynamic information (about which mirrors can be used to retrieve the file). 
+Static information is expensive to calculate for big files, so it makes sense to pre-calculate it and cache it.
+In contrast, dynamic information changes over time, e.g. new mirrors are added or some mirrors are temporarily unavailable, so it is not advisable to store static and dynamic data together for metalink format.
+
+Metalink utility can be used to generate static data, this is why it prints only part of XML expected by the Metalink standard. Further XML must be extended to include dynamic information and missing parts.
+
+== Building
+
+Simple `go build` should generate binary
+
+[source,bash]
+-----------------
+~/metalink> go build metalink.go
+~/metalink> ll
+-rwxr-xr-x 1 an users    2354930 May 11 19:27 metalink
+-rw-r--r-- 1 an users       2366 May 11 19:00 metalink.go
+-----------------
+
+== Usage
+
+Just pass file as first parameter and optional block size as second parameter. 
+
+[source,bash]
+-----------------
+~/metalink> ./metalink Media3.iso $((1024*1024))
+  <file name="Media3.iso">
+      <size>6731776</size>
+      <hash type="md5">fd817469ef767c93aa0b581955c4f2bd</hash>
+      <hash type="sha-1">d1ad52ecb6a876f7e63b5424cd8d55bac9cbcf80</hash>
+      <hash type="sha-256">e43e8880bc6d918a23dbdd703dd6aa771abdb58f320f7c979bef0975fdf6c550</hash>
+      <pieces length="1048576" type="sha-1">
+          <hash>090bf07f7b1d5807291f9a1dd560c3f3914463b6</hash>
+          <hash>baad2ef4568b608884e1ab5b0f28000711adbf13</hash>
+          <hash>dcbc109821b773035d7336b34df6d4937e54ed29</hash>
+          <hash>701628c432fd25774f25e9a845f7be1ddd78beec</hash>
+          <hash>c617f2cff765a72fab1f60c4f05f45f94ae9a514</hash>
+          <hash>402f6a1d80c4bdc1f1ffd4d8b8e209ced290a702</hash>
+          <hash>30490e7595b000784ada3fade6b4de492ced964c</hash>
+      </pieces>
+  <file>
+-----------------
+
+== Performance
+
+On my machine metalink is ~30% slower than sha256sum untility , (but it does more work): 66 sec vs 47,5 sec for ~9Gb file.
+So it should be enough to conclude about ambitious performance.
+
+[source,bash]
+-----------------
+~/metalink> time sha256sum Media1.iso
+212822ff2b15deec4211197884d67910becbe453d90807a130e9b46d4c6f7b52 Media1.iso
+
+real    0m47.566s
+user    0m46.470s
+sys     0m1.096s
+~/metalink> time ./metalink Media1.iso | grep sha-256
+      <hash type="sha-256">212822ff2b15deec4211197884d67910becbe453d90807a130e9b46d4c6f7b52</hash>
+
+real    1m0.633s
+user    0m59.530s
+sys     0m1.125s
+-----------------
