@@ -46,7 +46,7 @@ Just pass file as first parameter and optional block size as second parameter.
 
 == Performance
 
-On my machine metalink is ~30% slower than sha256sum untility , (but it does more work): 66 sec vs 47,5 sec for ~9Gb file.
+On my machine metalink is ~20% slower than sha256sum untility , (but it does more work): 60 sec vs 47,5 sec for ~9Gb file.
 So it should be enough to conclude about ambitious performance.
 
 [source,bash]
